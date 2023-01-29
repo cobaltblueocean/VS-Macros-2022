@@ -12,6 +12,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSMacros.Engines;
 using VSMacros.Models;
@@ -55,6 +56,7 @@ namespace VSMacros
 
         private void MacroTreeView_Loaded(object sender, RoutedEventArgs e)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Select Current macro
             MacroFSNode.FindNodeFromFullPath(Manager.CurrentMacroPath).IsSelected = true;
         }
@@ -63,6 +65,7 @@ namespace VSMacros
         {
             // Make sure dragging is not initiated
             this.isDragging = false;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             // Make sure that the clicks has selected the item
             TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
@@ -169,8 +172,11 @@ namespace VSMacros
 
             if (!node.IsDirectory)
             {
-                Action playback = () => Manager.Instance.Playback(node.FullPath);
-                this.Dispatcher.BeginInvoke(playback);
+                Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(async delegate
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    Manager.Instance.Playback(node.FullPath);
+                });
             }
         }
 
@@ -248,6 +254,7 @@ namespace VSMacros
 
         private void TreeViewItem_Drop(object sender, DragEventArgs e)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             e.Effects = DragDropEffects.None;
             e.Handled = true;
 

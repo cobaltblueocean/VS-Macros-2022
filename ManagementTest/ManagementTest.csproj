@@ -39,9 +39,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MacroFSNodeTests.cs" />
@@ -51,8 +54,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VSMacros2022\VSMacros.csproj">
-      <Project>{65235707-11e9-4200-ab45-cc1b602955ff}</Project>
+    <ProjectReference Include="..\VSMacros\VSMacros.csproj">
+      <Project>{80a7d975-4d13-4f46-b7ab-a991996d5c79}</Project>
       <Name>VSMacros</Name>
     </ProjectReference>
   </ItemGroup>

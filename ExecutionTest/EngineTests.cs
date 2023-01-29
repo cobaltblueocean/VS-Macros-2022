@@ -36,5 +36,11 @@ namespace ExecutionTest
             //Assert.AreEqual(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Test.js"), this.fileNode.FullPath);
             //Assert.IsFalse(this.fileNode.IsEditable);
         }
+
+        [TestMethod]
+        public void CheckVisualStudioVersion()
+        {
+            string version = ExecutionEngine.Utility.GetVisualStudioPath();
+        }
     }
 }

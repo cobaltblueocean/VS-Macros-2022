@@ -12,6 +12,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using System.Xml.Linq;
+using Microsoft;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -101,9 +102,12 @@ namespace VSMacros.Engines
         private Manager(IServiceProvider provider)
         {
             this.serviceProvider = provider;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.uiShell = (IVsUIShell)provider.GetService(typeof(SVsUIShell));
             this.dte = (EnvDTE.DTE)provider.GetService(typeof(SDTE));
+            Assumes.Present(dte);
             this.recorder = (IRecorder)this.serviceProvider.GetService(typeof(IRecorder));
+            Assumes.Present(recorder);
 
             this.LoadShortcuts();
             this.shortcutsLoaded = true;
@@ -114,6 +118,7 @@ namespace VSMacros.Engines
         
         private static void AttachEvents(Executor executor)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             executor.ResetMessages();
 
             var dispatcher = Dispatcher.CurrentDispatcher;
@@ -135,11 +140,12 @@ namespace VSMacros.Engines
         {
             try
             {
-                dispatcher.Invoke(new Action(() =>
+                Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(async delegate
                 {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     VSMacrosPackage.Current.ClearStatusBar();
                     VSMacrosPackage.Current.UpdateButtonsForPlayback(false);
-                }));
+                });
             }
             catch (Exception)
             {
@@ -167,6 +173,8 @@ namespace VSMacros.Engines
 
         public void StartRecording()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             // Move focus back to previous window
             if (this.dte.ActiveWindow.Caption == "Macro Explorer" && PreviousWindow != null)
             {
@@ -183,6 +191,7 @@ namespace VSMacros.Engines
         public void StopRecording()
         {
             string current = Manager.CurrentMacroPath;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             bool currentWasOpen = false;
 
@@ -215,6 +224,8 @@ namespace VSMacros.Engines
 
         public void Playback(string path, int iterations = 1)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             if (string.IsNullOrEmpty(path))
             {
                 path = SelectedMacro == null ? CurrentMacroPath : SelectedMacro.FullPath;
@@ -236,6 +247,7 @@ namespace VSMacros.Engines
 
         public void PlaybackMultipleTimes(string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             PlaybackMultipleTimesDialog dlg = new PlaybackMultipleTimesDialog();
             bool? result = dlg.ShowDialog();
 
@@ -251,6 +263,7 @@ namespace VSMacros.Engines
 
         private void TogglePlayback(string path, int iterations)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             AttachEvents(this.Executor);
 
             if (Manager.Instance.executor.IsEngineRunning)
@@ -268,7 +281,8 @@ namespace VSMacros.Engines
 
         private string GetExecutingMacroNameForPossibleErrorDisplay(MacroFSNode node, string path)
         {
-            if(node != null)
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            if (node != null)
             {
                 return node.Name;
             }
@@ -286,6 +300,7 @@ namespace VSMacros.Engines
 
         public void PlaybackCommand(int cmd)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Load shortcuts if not already loaded
             if (!this.shortcutsLoaded)
             {
@@ -310,11 +325,12 @@ namespace VSMacros.Engines
             path = !string.IsNullOrEmpty(path) ? path : this.SelectedMacro.FullPath;
 
             // Open the macro directory and let the user manage the macros
-            System.Threading.Tasks.Task.Run(() => System.Diagnostics.Process.Start(path));
+            _ = System.Threading.Tasks.Task.Run(() => System.Diagnostics.Process.Start(path));
         }
 
         public void SaveCurrent()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             SaveCurrentDialog dlg = new SaveCurrentDialog();
             dlg.ShowDialog();
 
@@ -360,6 +376,7 @@ namespace VSMacros.Engines
 
         public void Refresh(bool reloadShortcut = true)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // If the shortcuts have been modified, ask to save them
             if (this.shortcutsDirty && reloadShortcut)
             {
@@ -404,6 +421,7 @@ namespace VSMacros.Engines
 
         public void AssignShortcut()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             AssignShortcutDialog dlg = new AssignShortcutDialog();
             dlg.ShowDialog();
 
@@ -448,6 +466,7 @@ namespace VSMacros.Engines
 
         public void Delete()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode macro = this.SelectedMacro;
 
             // Don't delete if macro is being edited
@@ -502,6 +521,7 @@ namespace VSMacros.Engines
 
         public void NewMacro()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode macro = this.SelectedMacro;
             macro.IsExpanded = true;
 
@@ -531,6 +551,7 @@ namespace VSMacros.Engines
 
         public void NewFolder()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode macro = this.SelectedMacro;
             macro.IsExpanded = true;
 
@@ -552,6 +573,7 @@ namespace VSMacros.Engines
 
         public static void CreateFileSystem()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Create main macro directory
             if (!Directory.Exists(VSMacrosPackage.Current.MacroDirectory))
             {
@@ -589,12 +611,14 @@ namespace VSMacros.Engines
 
         public void Close()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.SaveFolderExpansion();
             this.SaveShortcuts();
         }
 
         private string RelativeIntellisensePath(int depth)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             string path = Manager.IntellisenseFileName;
 
             for (int i = 0; i < depth; i++)
@@ -607,6 +631,7 @@ namespace VSMacros.Engines
 
         public void MoveItem(MacroFSNode sourceItem, MacroFSNode targetItem)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             string sourcePath = sourceItem.FullPath;
             string targetPath = Path.Combine(targetItem.FullPath, sourceItem.Name);
             string extension = ".js";
@@ -675,6 +700,7 @@ namespace VSMacros.Engines
 
         public void Reopen(string source, string target)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 this.dte.Documents.Item(source).Close(EnvDTE.vsSaveChanges.vsSaveChangesNo);
@@ -685,6 +711,7 @@ namespace VSMacros.Engines
 
         private StreamReader LoadFile(string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 if (!File.Exists(path))
@@ -706,6 +733,7 @@ namespace VSMacros.Engines
 
         private void SaveMacro(Stream str, string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 using (var fileStream = File.Create(path))
@@ -722,7 +750,7 @@ namespace VSMacros.Engines
 
         public void LoadFolderExpansion()
         {
-            string path = Path.Combine(VSMacrosPackage.Current.UserLocalDataPath, Manager.FolderExpansionFileName);
+            string path = Path.Combine(VSMacrosPackage.Current.UserLocalDataPathEx, Manager.FolderExpansionFileName);
 
             if (File.Exists(path))
             {
@@ -743,11 +771,12 @@ namespace VSMacros.Engines
         {
             var folders = string.Join(Environment.NewLine, MacroFSNode.EnabledDirectories);
 
-            File.WriteAllText(Path.Combine(VSMacrosPackage.Current.UserLocalDataPath, Manager.FolderExpansionFileName), folders);
+            File.WriteAllText(Path.Combine(VSMacrosPackage.Current.UserLocalDataPathEx, Manager.FolderExpansionFileName), folders);
         }
 
         private void LoadShortcuts()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.shortcutsLoaded = true;
 
             try
@@ -802,7 +831,7 @@ namespace VSMacros.Engines
             {
                 File.Create(Manager.CurrentMacroPath).Close();
 
-                Task.Run(() =>
+                _ = Task.Run(() =>
                 {
                     // Write to current macro file
                     File.WriteAllText(Manager.CurrentMacroPath, "/// <reference path=\"" + Manager.IntellisensePath + "\" />");
@@ -822,6 +851,7 @@ namespace VSMacros.Engines
 
         private void SaveMacroIfDirty(string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 EnvDTE.Document doc = this.dte.Documents.Item(path);
@@ -844,6 +874,7 @@ namespace VSMacros.Engines
 
         public VSConstants.MessageBoxResult ShowMessageBox(string message, OLEMSGBUTTON btn = OLEMSGBUTTON.OLEMSGBUTTON_OK)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.uiShell == null)
             {
                 return VSConstants.MessageBoxResult.IDABORT;

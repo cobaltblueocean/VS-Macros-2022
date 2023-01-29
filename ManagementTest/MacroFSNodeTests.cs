@@ -4,13 +4,17 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Management;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VSMacros.Engines;
 using VSMacros.Models;
+using Microsoft.Win32;
 
 namespace ManagementTest
 {
@@ -22,10 +26,10 @@ namespace ManagementTest
         private MacroFSNode fileNode;
         private MacroFSNode directoryNode;
 
-        public MacroFSNodeTests()
-        {
-            CreateFileSystemNodes();
-        }
+        //public MacroFSNodeTests()
+        //{
+        //    CreateFileSystemNodes();
+        //}
 
         [TestMethod]
         public void Constructor_InitializesNode()
@@ -196,7 +200,6 @@ namespace ManagementTest
             this.fileNode.IsExpanded = true;
 
             // Two event are fired
-            // Two event are fired
             List<string> expected = new List<string> { "IsExpanded", "Icon" };
             CollectionAssert.AreEquivalent(expected, receivedEvents);
         }
@@ -204,7 +207,6 @@ namespace ManagementTest
         #endregion
 
         #region Helpers
-
         [TestInitialize]
         public void CreateFileSystemNodes()
         {

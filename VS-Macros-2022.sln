@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSMacros", "VSMacros2022\VSMacros.csproj", "{65235707-11E9-4200-AB45-CC1B602955FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSMacros-VSIX", "VSMacros-VSIX\VSMacros-VSIX.csproj", "{65235707-11E9-4200-AB45-CC1B602955FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutionEngine", "ExecutionEngine\ExecutionEngine.csproj", "{34F4BD99-CE2F-4437-9CB1-766A772A1AAB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutionTest", "ExecutionTest\ExecutionTest.csproj", "{66F1F4C5-16C8-4139-A629-F013DA85446D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementTest", "ManagementTest\ManagementTest.csproj", "{58474235-6B2D-46F2-B325-B4D37725C5F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSMacros", "VSMacros\VSMacros.csproj", "{80A7D975-4D13-4F46-B7AB-A991996D5C79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,18 @@ Global
 		{58474235-6B2D-46F2-B325-B4D37725C5F9}.Release|arm64.Build.0 = Release|Any CPU
 		{58474235-6B2D-46F2-B325-B4D37725C5F9}.Release|x86.ActiveCfg = Release|Any CPU
 		{58474235-6B2D-46F2-B325-B4D37725C5F9}.Release|x86.Build.0 = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|arm64.Build.0 = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Debug|x86.Build.0 = Debug|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|arm64.ActiveCfg = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|arm64.Build.0 = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|x86.ActiveCfg = Release|Any CPU
+		{80A7D975-4D13-4F46-B7AB-A991996D5C79}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

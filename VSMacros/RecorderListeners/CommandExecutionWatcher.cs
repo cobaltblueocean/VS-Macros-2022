@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 
 using System;
+using Microsoft;
 using Microsoft.Internal.VisualStudio.Shell;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -26,6 +27,7 @@ namespace VSMacros.RecorderListeners
 
         internal CommandExecutionWatcher(IServiceProvider serviceProvider)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Validate.IsNotNull(serviceProvider, "serviceProvider");
             this.serviceProvider = serviceProvider;
          
@@ -37,10 +39,12 @@ namespace VSMacros.RecorderListeners
                 rpct.RegisterPriorityCommandTarget(dwReserved: 0U, pCmdTrgt: this, pdwCookie: out this.priorityCommandTargetCookie);
             }
             this.macroRecorder = (IRecorderPrivate)serviceProvider.GetService(typeof(IRecorder));
+            Assumes.Present(macroRecorder);
         }
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.macroRecorder.IsRecording)
             {
                 // An Exec call with a non-null pvaOut implies it is actually the shell trying to get the combo box child items for a 
@@ -66,6 +70,7 @@ namespace VSMacros.RecorderListeners
 
         public void Dispose()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.priorityCommandTargetCookie != 0U && this.serviceProvider != null)
             {
                 var rpct = (IVsRegisterPriorityCommandTarget)this.serviceProvider.GetService(typeof(SVsRegisterPriorityCommandTarget));
@@ -83,6 +88,7 @@ namespace VSMacros.RecorderListeners
 
         private string ConvertGuidDWordToName(Guid guid, uint dword)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var cmdNameMapping = (IVsCmdNameMapping)this.serviceProvider.GetService(typeof(SVsCmdNameMapping));
             if (cmdNameMapping == null)
             {

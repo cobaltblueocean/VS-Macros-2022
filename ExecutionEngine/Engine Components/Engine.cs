@@ -91,6 +91,7 @@ namespace ExecutionEngine
 
         public Engine(int pid, string version)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.engine = this.CreateEngine();
             this.scriptSite = new Site();
             this.parser = new Parser(this.engine);
@@ -101,6 +102,7 @@ namespace ExecutionEngine
 
         private void InformEngineOfNewObjects(int pid, string version)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             const string dte = "dte";
             this.InitializeDteObject(pid, version);
             this.engine.AddNamedItem(dte, ScriptItem.CodeOnly | ScriptItem.IsVisible);

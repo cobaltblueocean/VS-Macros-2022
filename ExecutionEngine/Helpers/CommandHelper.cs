@@ -68,6 +68,7 @@ namespace ExecutionEngine.Helpers
 
         public CommandHelper(System.IServiceProvider serviceProvider)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var rot = this.GetRunningObjectTable();
 
             System.Runtime.InteropServices.ComTypes.IMoniker cmdDispatchMoniker = this.GetCmdDispatcherMoniker();
@@ -87,6 +88,7 @@ namespace ExecutionEngine.Helpers
 
         public void DispatchCommandByName(object canonicalName)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Guid cmdSet;
             uint cmdId;
             ErrorHandler.ThrowOnFailure(this.cmdNameMapping.MapNameToGUIDID((string)canonicalName, out cmdSet, out cmdId));
@@ -95,6 +97,7 @@ namespace ExecutionEngine.Helpers
 
         public void DispatchCommand(object commandSet, object commandId)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.DispatchCommandHelper(commandSet, commandId);
         }
 
@@ -103,6 +106,7 @@ namespace ExecutionEngine.Helpers
             Validate.IsNotNull(commandSet, "commandSet");
             Validate.IsNotNull(commandId, "commandId");
             Validate.IsNotNull(pvaIn, "pvaIn");
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             char character = ((string)pvaIn)[0];
             this.DispatchCommandHelper(commandSet, commandId, () => 
@@ -128,16 +132,19 @@ namespace ExecutionEngine.Helpers
 
         private void DispatchCommandHelper(object commandSet, object commandId)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.DispatchCommandHelper(commandSet, commandId, getCmdArgs: null, releaseCmdArgs: null);
         }
 
         private void DispatchCommandHelper(Guid commandSet, uint commandId)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.DispatchCommandHelper(commandSet, commandId, getCmdArgs: null, releaseCmdArgs: null);
         }
 
         private void DispatchCommandHelper(object commandSet, object commandId, Func<IntPtr> getCmdArgs, Action<IntPtr> releaseCmdArgs)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Guid cmdSet = Guid.Parse((string)commandSet);
 
             uint cmdId = (uint)(int)commandId;
@@ -147,6 +154,7 @@ namespace ExecutionEngine.Helpers
 
         private void DispatchCommandHelper(Guid commandSet, uint commandId, Func<IntPtr> getCmdArgs, Action<IntPtr> releaseCmdArgs)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.IsCommandEnabled(ref commandSet, commandId))
             {
                 IntPtr cmdArgs = IntPtr.Zero;
@@ -167,6 +175,7 @@ namespace ExecutionEngine.Helpers
 
         private bool IsCommandEnabled(ref Guid cmdSet, uint cmdId)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             OLECMD[] cmds = new OLECMD[] { new OLECMD() { cmdID = cmdId } };
             ErrorHandler.ThrowOnFailure(this.shellCmdTarget.QueryStatus(ref cmdSet, (uint)cmds.Length, cmds, IntPtr.Zero));
             OLECMDF flags = (OLECMDF)cmds[0].cmdf;

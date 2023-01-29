@@ -7,23 +7,29 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Management;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using EnvDTE;
+using Microsoft;
 using Microsoft.Internal.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.CommandBars;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
 using VSMacros.Engines;
 using VSMacros.Interfaces;
 using VSMacros.Model;
 
 namespace VSMacros
 {
+    using Process = System.Diagnostics.Process;
+
     [Guid(GuidList.GuidVSMacrosPkgString)]
     [ProvideToolWindow(typeof(MacrosToolWindow), Style = VsDockStyle.Tabbed, Window = "3ae79031-e1bc-11d0-8f78-00a0c9110057")]
     public sealed class VSMacrosPackage : Package
@@ -49,6 +55,7 @@ namespace VSMacros
 
         private void ShowToolWindow(object sender = null, EventArgs e = null)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Get the (only) instance of this tool window
             // The last flag is set to true so that if the tool window does not exists it will be created.
             ToolWindowPane window = this.FindToolWindow(typeof(MacrosToolWindow), 0, true);
@@ -67,7 +74,7 @@ namespace VSMacros
             {
                 if (this.macroDirectory == default(string))
                 {
-                    this.macroDirectory = Path.Combine(this.UserLocalDataPath, "Macros");
+                    this.macroDirectory = Path.Combine(this.UserLocalDataPathEx, "Macros");
                 }
                 return this.macroDirectory;
             }
@@ -115,9 +122,11 @@ namespace VSMacros
         protected override void Initialize()
         {
             base.Initialize();
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             ((IServiceContainer)this).AddService(typeof(IRecorder), (serviceContainer, type) => { return new Recorder(this); }, promote: true);
             this.statusBar = (IVsStatusbar)GetService(typeof(SVsStatusbar));
+            Assumes.Present(statusBar);
 
             // Add our command handlers for the menu
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -161,6 +170,98 @@ namespace VSMacros
                 mcs.AddCommand(new MenuCommand(this.PlaybackCommand9, new CommandID(GuidList.GuidVSMacrosCmdSet, PkgCmdIDList.CmdIdCommand9)));
             }
         }
+
+        public string UserLocalDataPathEx
+        {
+            get
+            {
+                String path = String.Empty;
+                try
+                {
+                    path = this.UserLocalDataPath;
+                }
+                catch(NotSupportedException)
+                {
+                    path = GetDefaultMacroPath();
+                }
+                return path;
+            }
+        }
+
+        private string GetDefaultMacroPath()
+        {
+            String result = "";
+            String vsVersion = "";
+
+            var processes = Process.GetProcessesByName("devenv");
+
+            foreach (var process in processes)
+            {
+                if (process.MainModule.FileName.Contains("2022"))
+                {
+                    vsVersion = FileVersionInfo.GetVersionInfo(process.MainModule.FileName).FileMajorPart.ToString();
+                }
+            }
+
+            var myId = Process.GetCurrentProcess().Id;
+            var query = string.Format("SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {0}", myId);
+            var search = new ManagementObjectSearcher("root\\CIMV2", query);
+            var results = search.Get().GetEnumerator();
+            results.MoveNext();
+            var queryObj = results.Current;
+            var parentId = (uint)queryObj["ParentProcessId"];
+            var parent = Process.GetProcessById((int)parentId);
+            var pathInfo = parent.MainModule.FileName.Split('\\');
+            var versionNum = "";
+            var appRegisterCode = "";
+
+            for (int i = 0; i < pathInfo.Length; i++)
+            {
+                if (pathInfo[i] == "Microsoft Visual Studio")
+                {
+                    versionNum = pathInfo[i + 1];
+                    break;
+                }
+            }
+
+            String baseKey = "Software\\Wow6432Node\\Microsoft";
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(baseKey))
+            {
+                if (key != null)
+                {
+                    var subKeyNames = key.GetSubKeyNames();
+
+                    foreach (var subKeyName in subKeyNames)
+                    {
+                        if (subKeyName.StartsWith("VisualStudio"))
+                        {
+                            var subKey = key.OpenSubKey(subKeyName);
+                            if (subKey != null)
+                            {
+                                var capabilities = subKey.OpenSubKey("Capabilities");
+                                if (capabilities != null)
+                                {
+                                    var names = capabilities.GetValueNames();
+
+                                    if (names != null)
+                                    {
+                                        var _tmpAppName = (String)capabilities.GetValue("ApplicationName");
+                                        if (_tmpAppName.Contains(versionNum))
+                                        {
+                                            appRegisterCode = subKeyName.Replace("VisualStudio_", "");
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            result = Path.Combine(path, "Microsoft", "VisualStudio", vsVersion + ".0_" + appRegisterCode, "Macros");
+            return result;
+        }
         #endregion
 
         /////////////////////////////////////////////////////////////////////////////
@@ -169,7 +270,9 @@ namespace VSMacros
 
         private void Record(object sender, EventArgs arguments)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             IRecorderPrivate macroRecorder = (IRecorderPrivate)this.GetService(typeof(IRecorder));
+            Assumes.Present(macroRecorder);
             if (!macroRecorder.IsRecording)
             {
                 Manager.Instance.StartRecording();
@@ -190,6 +293,7 @@ namespace VSMacros
 
         public void Playback(object sender, EventArgs arguments)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (Manager.Instance.executor == null || !Manager.Instance.executor.IsEngineRunning)
             {
                 //this.UpdateButtonsForPlayback(true);
@@ -204,6 +308,7 @@ namespace VSMacros
 
         private void PlaybackMultipleTimes(object sender, EventArgs arguments)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (Manager.Instance.executor == null || !Manager.Instance.executor.IsEngineRunning)
             {
                 //this.UpdateButtonsForPlayback(true);
@@ -218,24 +323,53 @@ namespace VSMacros
 
         private void SaveCurrent(object sender, EventArgs arguments)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.SaveCurrent();
         }
 
-        private void PlaybackCommand1(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(1); }
-        private void PlaybackCommand2(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(2); }
-        private void PlaybackCommand3(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(3); }
-        private void PlaybackCommand4(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(4); }
-        private void PlaybackCommand5(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(5); }
-        private void PlaybackCommand6(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(6); }
-        private void PlaybackCommand7(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(7); }
-        private void PlaybackCommand8(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(8); }
-        private void PlaybackCommand9(object sender, EventArgs arguments) { Manager.Instance.PlaybackCommand(9); }
+        private void PlaybackCommand1(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(1); 
+        }
+        private void PlaybackCommand2(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(2); 
+        }
+        private void PlaybackCommand3(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(3); 
+        }
+        private void PlaybackCommand4(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(4);
+        }
+        private void PlaybackCommand5(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(5);
+        }
+        private void PlaybackCommand6(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(6);
+        }
+        private void PlaybackCommand7(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(7); 
+        }
+        private void PlaybackCommand8(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(8); 
+        }
+        private void PlaybackCommand9(object sender, EventArgs arguments) {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            Manager.Instance.PlaybackCommand(9); 
+        }
 
         #endregion
 
         #region Status Bar & Menu Icons
         public void ChangeMenuIcons(BitmapSource icon, int commandNumber)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // commandNumber is 0 for Recording, 1 for Playback and 2 for Playback Multiple Times         
             try
             {
@@ -259,6 +393,7 @@ namespace VSMacros
 
         internal void StatusBarChange(string status, int animation)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.statusBar.Clear();
             this.statusBar.SetText(status);
         }
@@ -267,6 +402,7 @@ namespace VSMacros
         {
             get
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 if (this.imageButtons == null)
                 {
                     this.imageButtons = new List<CommandBarButton>();
@@ -278,7 +414,9 @@ namespace VSMacros
 
         private void AddMenuButton()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             DTE dte = (DTE)this.GetService(typeof(SDTE));
+            Assumes.Present(dte);
             CommandBar mainMenu = ((CommandBars)dte.CommandBars)["MenuBar"];
             CommandBarPopup toolMenu = (CommandBarPopup)mainMenu.Controls["Tools"];
             CommandBarPopup macroMenu = (CommandBarPopup)toolMenu.Controls["Macros"];
@@ -310,6 +448,7 @@ namespace VSMacros
 
         private void UpdateButtonsForRecording(bool isRecording)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.EnableMyCommand(PkgCmdIDList.CmdIdPlayback, !isRecording);
             this.EnableMyCommand(PkgCmdIDList.CmdIdPlaybackMultipleTimes, !isRecording);
             this.UpdateCommonButtons(!isRecording);
@@ -317,6 +456,7 @@ namespace VSMacros
 
         public void UpdateButtonsForPlayback(bool goingToPlay)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.EnableMyCommand(PkgCmdIDList.CmdIdRecord, !goingToPlay);
             this.EnableMyCommand(PkgCmdIDList.CmdIdPlaybackMultipleTimes, !goingToPlay);
             this.UpdateCommonButtons(!goingToPlay);
@@ -333,6 +473,7 @@ namespace VSMacros
 
         private void UpdateCommonButtons(bool enable)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.EnableMyCommand(PkgCmdIDList.CmdIdSaveTemporaryMacro, enable);
             this.EnableMyCommand(PkgCmdIDList.CmdIdRefresh, enable);
             this.EnableMyCommand(PkgCmdIDList.CmdIdOpenDirectory, enable);
@@ -340,9 +481,11 @@ namespace VSMacros
 
         internal bool EnableMyCommand(int cmdID, bool enableCmd)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             bool cmdUpdated = false;
             var mcs = this.GetService(typeof(IMenuCommandService))
                     as OleMenuCommandService;
+            Assumes.Present(mcs);
             var newCmdID = new CommandID(GuidList.GuidVSMacrosCmdSet, cmdID);
             MenuCommand mc = mcs.FindCommand(newCmdID);
             if (mc != null)
@@ -355,6 +498,7 @@ namespace VSMacros
 
         internal void ClearStatusBar()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.StatusBarChange(Resources.StatusBarReadyText, 0);
         }
 
@@ -410,7 +554,9 @@ namespace VSMacros
 
         protected override int QueryClose(out bool canClose)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             IRecorderPrivate macroRecorder = (IRecorderPrivate)this.GetService(typeof(IRecorder));
+            Assumes.Present(macroRecorder);
             if (macroRecorder.IsRecording)
             {
                 string message = Resources.ExitMessage;
@@ -440,11 +586,13 @@ namespace VSMacros
 
         private void Record_OnBeforeQueryStatus(object sender, EventArgs e)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var recordCommand = sender as OleMenuCommand;
 
             if (recordCommand != null)
             {
                 IRecorderPrivate macroRecorder = (IRecorderPrivate)this.GetService(typeof(IRecorder));
+                Assumes.Present(macroRecorder);
                 if (macroRecorder.IsRecording)
                 {
                     recordCommand.Text = Resources.MenuTextRecording;

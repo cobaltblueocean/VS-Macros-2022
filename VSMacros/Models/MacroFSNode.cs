@@ -13,9 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using MessagePack.Formatters;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSMacros.Engines;
+using VSMacros.Helpers;
 using GelUtilities = Microsoft.Internal.VisualStudio.PlatformUI.Utilities;
 
 namespace VSMacros.Models
@@ -94,6 +96,7 @@ namespace VSMacros.Models
         {
             get
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 string path = Path.GetFileNameWithoutExtension(this.FullPath);
 
                 if (string.IsNullOrWhiteSpace(path))
@@ -106,6 +109,7 @@ namespace VSMacros.Models
 
             set
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 try
                 {
                     // Path.GetFullPath will throw an exception if the path is invalid
@@ -203,6 +207,7 @@ namespace VSMacros.Models
         {
             get
             {
+                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 if (this.IsDirectory)
                 {
                     Bitmap bmp;
@@ -228,15 +233,10 @@ namespace VSMacros.Models
                 }
                 else
                 {
-                    IVsImageService imageService = (IVsImageService)((IServiceProvider)VSMacrosPackage.Current).GetService(typeof(SVsImageService));
+                    IVsImageService2 imageService = (IVsImageService2)((IServiceProvider)VSMacrosPackage.Current).GetService(typeof(SVsImageService));
                     if (imageService != null)
                     {
-                        IVsUIObject uiObject = imageService.GetIconForFile(Path.GetFileName(this.FullPath), __VSUIDATAFORMAT.VSDF_WPF);
-                        if (uiObject != null)
-                        {
-                            BitmapSource bitmapSource = GelUtilities.GetObjectData(uiObject) as BitmapSource;
-                            return bitmapSource;
-                        }
+                        return IVsImageService2Helper.GetImage(imageService.GetImageMonikerForFile(Path.GetFileName(this.FullPath)));
                     }
                 }
 
@@ -405,10 +405,10 @@ namespace VSMacros.Models
         private ObservableCollection<MacroFSNode> GetChildNodes()
         {
             var files = from childFile in Directory.GetFiles(this.FullPath)
-                       where Path.GetExtension(childFile) == ".js"
-                       where childFile != Manager.CurrentMacroPath
-                       orderby childFile
-                       select childFile;
+                        where Path.GetExtension(childFile) == ".js"
+                        where childFile != Manager.CurrentMacroPath
+                        orderby childFile
+                        select childFile;
 
             var directories = from childDirectory in Directory.GetDirectories(this.FullPath)
                               orderby childDirectory
@@ -480,6 +480,7 @@ namespace VSMacros.Models
         /// <returns>MacroFSNode  whose FullPath is path</returns>
         public static MacroFSNode FindNodeFromFullPath(string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (MacroFSNode.RootNode == null)
             {
                 return null;
@@ -526,6 +527,7 @@ namespace VSMacros.Models
 
         public static MacroFSNode SelectNode(string path)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Find node
             MacroFSNode node = FindNodeFromFullPath(path);
             if (node != null)
@@ -539,12 +541,14 @@ namespace VSMacros.Models
 
         public static void RefreshTree()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode root = MacroFSNode.RootNode;
             MacroFSNode.RefreshTree(root);
         }
 
         private void AfterRefresh(MacroFSNode root, string selectedPath, HashSet<string> dirs)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Set IsEnabled for each folders
             root.SetIsExpanded(root, dirs);
 
@@ -558,6 +562,7 @@ namespace VSMacros.Models
 
         public static void RefreshTree(MacroFSNode root)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode selected = MacrosControl.Current.MacroTreeView.SelectedItem as MacroFSNode;
 
             // Make a copy of the hashset

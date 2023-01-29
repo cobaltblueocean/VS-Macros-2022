@@ -9,6 +9,7 @@ using System.ComponentModel.Design;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.PlatformUI;
 using VSMacros.Engines;
@@ -74,6 +75,7 @@ namespace VSMacros.Dialogs
             string targetGUID = "BAFF6A1A-0CF2-11D1-8C8D-0000F87570EE";
             var command = new CommandID(VSConstants.GUID_VSStandardCommandSet97, VSConstants.cmdidToolsOptions);
             var mcs = ((IServiceProvider)VSMacrosPackage.Current).GetService(typeof(IMenuCommandService)) as MenuCommandService;
+            Assumes.Present(mcs);
             mcs.GlobalInvoke(command, targetGUID);
         }
 

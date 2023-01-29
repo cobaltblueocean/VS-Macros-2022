@@ -5,9 +5,9 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{34F4BD99-CE2F-4437-9CB1-766A772A1AAB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>ExecutionEngine</RootNamespace>
-    <AssemblyName>ExecutionEngine</AssemblyName>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>VisualStudio.Macros.ExecutionEngine</RootNamespace>
+    <AssemblyName>VisualStudio.Macros.ExecutionEngine</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -31,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -84,6 +87,7 @@
     <Compile Include="Custom Exceptions\RuntimeException.cs" />
     <Compile Include="Engine Components\Site.cs" />
     <Compile Include="Stubs\Script.cs" />
+    <Compile Include="Utility.cs" />
     <Compile Include="Validate.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -96,9 +100,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

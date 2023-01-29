@@ -6,6 +6,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft;
 using Microsoft.Internal.VisualStudio.Shell;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -27,10 +28,12 @@ namespace VSMacros.RecorderListeners
             Validate.IsNotNull(serviceProvider, "serviceProvider");
             this.serviceProvider = serviceProvider;
             this.macroRecorder = (IRecorderPrivate)serviceProvider.GetService(typeof(IRecorder));
+            Assumes.Present(macroRecorder);
         }
 
         public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (macroRecorder.IsRecording)
             {
                 if ((pguidCmdGroup == VSConstants.CMDSETID.StandardCommandSet2K_guid) && (nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR))
@@ -47,6 +50,7 @@ namespace VSMacros.RecorderListeners
 
         public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.NextCommandTarget != null)
             {
                 return this.NextCommandTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
