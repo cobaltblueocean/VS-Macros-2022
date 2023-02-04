@@ -42,7 +42,6 @@ namespace VSMacros
 
         private FileChangeMonitor(IServiceProvider serviceProvider)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             IVsFileChangeEx fileChangeService = serviceProvider.GetService(typeof(SVsFileChangeEx)) as IVsFileChangeEx;
             this.fileChangeService = fileChangeService;
 
@@ -60,7 +59,6 @@ namespace VSMacros
         public void MonitorFolder(string path)
         {
             uint cookie;
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             FileChangeService.AdviseDirChange(
                 path,
@@ -81,7 +79,6 @@ namespace VSMacros
         public void MonitorFile(string path)
         {
             uint cookie;
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             FileChangeService.AdviseFileChange(
                 path,
@@ -99,7 +96,6 @@ namespace VSMacros
         /// <param name="isDirectory">Boolean telling if the file system entry is a directory.</param>
         public void MonitorFileSystemEntry(string path, bool isDirectory)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (isDirectory)
             {
                 this.MonitorFolder(path);
@@ -119,7 +115,6 @@ namespace VSMacros
         public void UnmonitorFolder(string path)
         {
             uint cookie = this.cookies[path];
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             FileChangeService.UnadviseDirChange(cookie);
         }
@@ -133,7 +128,6 @@ namespace VSMacros
         public void UnmonitorFile(string path)
         {
             uint cookie = this.cookies[path];
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             FileChangeService.UnadviseFileChange(cookie);
         }
@@ -145,7 +139,6 @@ namespace VSMacros
         /// <param name="isDirectory">Boolean telling if the file system entry is a directory.</param>
         public void UnmonitorFileSystemEntry(string path, bool isDirectory)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (isDirectory)
             {
                 this.UnmonitorFolder(path);
@@ -167,9 +160,8 @@ namespace VSMacros
         /// </param>
         public int DirectoryChanged(string dir)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode node = MacroFSNode.FindNodeFromFullPath(dir);
-            if(node != null)
+            if (node != null)
             {
                 // Refresh tree rooted at the changed directory
                 MacroFSNode.RefreshTree(node);
@@ -191,7 +183,6 @@ namespace VSMacros
         /// Array of flags indicating the type of changes. <see cref="_VSFILECHANGEFLAGS" />.
         public int FilesChanged(uint numberOfFilesChanged, string[] files, uint[] changeTypes)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             // Go over each file and treat the change appropriately
             for (int i = 0; i < files.Length; i++)
             {
@@ -203,8 +194,8 @@ namespace VSMacros
                 if (change == _VSFILECHANGEFLAGS.VSFILECHG_Del)
                 {
                     MacroFSNode node = MacroFSNode.FindNodeFromFullPath(path);
-                    if(node != null)
-                    { 
+                    if (node != null)
+                    {
                         node.Delete();
                     }
                 }

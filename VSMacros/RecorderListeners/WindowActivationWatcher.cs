@@ -33,7 +33,6 @@ namespace VSMacros.RecorderListeners
         {
             Validate.IsNotNull(serviceProvider, "serviceProvider");
             Validate.IsNotNull(dataModel, "dataModel");
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             this.serviceProvider = serviceProvider;
             this.dataModel = dataModel;
@@ -50,7 +49,6 @@ namespace VSMacros.RecorderListeners
 
         public int OnElementValueChanged(uint elementid, object varValueOld, object varValueNew)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             var elementId = (VSConstants.VSSELELEMID)elementid;
             if (elementId == VSConstants.VSSELELEMID.SEID_WindowFrame)
             {
@@ -135,7 +133,6 @@ namespace VSMacros.RecorderListeners
 
         public void Dispose()
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (this.monSelCookie != 0U && this.serviceProvider != null)
             {
                 var monSel = (IVsMonitorSelection)this.serviceProvider.GetService(typeof(SVsShellMonitorSelection));

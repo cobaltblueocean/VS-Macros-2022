@@ -10,7 +10,7 @@ using ExecutionEngine.Interfaces;
 
 namespace ExecutionEngine
 {
-        internal sealed class Parser
+    internal sealed class Parser
     {
         private IActiveScriptParse32 parse32;
         private IActiveScriptParse64 parse64;
@@ -51,12 +51,12 @@ namespace ExecutionEngine
             {
                 this.parse32.ParseScriptText(unparsed,
                     itemName: null,
-                    context: null, 
-                    delimiter: null, 
-                    sourceContextCookie: IntPtr.Zero, 
-                    startingLineNumber: 0, 
-                    flags: flags, 
-                    result: out result, 
+                    context: null,
+                    delimiter: null,
+                    sourceContextCookie: IntPtr.Zero,
+                    startingLineNumber: 0,
+                    flags: flags,
+                    result: out result,
                     exceptionInfo: out exceptionInfo);
             }
             else

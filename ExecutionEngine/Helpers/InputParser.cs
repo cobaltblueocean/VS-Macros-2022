@@ -7,6 +7,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using EnvDTE;
 using Microsoft.Internal.VisualStudio.Shell;
 using VisualStudio.Macros.ExecutionEngine;
 using VSMacros.ExecutionEngine.Pipes.Shared;

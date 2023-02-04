@@ -12,6 +12,7 @@ using System.Windows.Threading;
 using VisualStudio.Macros.ExecutionEngine.Pipes;
 using VSMacros.Engines;
 using VSMacros.ExecutionEngine.Pipes;
+using Resources = VSMacros.Resources;
 
 namespace VSMacros.Pipes
 {

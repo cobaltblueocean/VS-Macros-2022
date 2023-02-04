@@ -19,6 +19,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using VSMacros.Engines;
 using VSMacros.Interfaces;
 using VSMacros.Models;
+using Resources = VSMacros.Resources;
 
 namespace VSMacros
 {
@@ -31,7 +32,6 @@ namespace VSMacros
         public MacrosToolWindow() :
             base(null)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.owningPackage = VSMacrosPackage.Current;
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
@@ -60,7 +60,6 @@ namespace VSMacros
 
         public void OnLoaded(object sender, System.Windows.RoutedEventArgs e)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (!this.addedToolbarButton)
             {
                 IVsWindowFrame windowFrame = (IVsWindowFrame)GetService(typeof(SVsWindowFrame));
@@ -155,61 +154,51 @@ namespace VSMacros
 
         private void Refresh(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.Refresh();
         }
 
         private void CollapseAll(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             MacroFSNode.CollapseAllNodes(MacroFSNode.RootNode);
         }
 
         public void OpenDirectory(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.OpenFolder(Manager.MacrosPath);
         }
 
         public void OpenSelectedFolder(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.OpenFolder();
         }
 
         public void Edit(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.Edit();
         }
 
         public void AssignShortcut(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.AssignShortcut();
         }
 
         public void Delete(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.Delete();
         }
 
         public void Rename(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.Rename();
         }
 
         public void NewMacro(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.NewMacro();
         }
 
         public void NewFolder(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             Manager.Instance.NewFolder();
         }
 
@@ -245,7 +234,6 @@ namespace VSMacros
         {
             get
             {
-                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 if (this.searchOptionsEnum == null)
                 {
                     List<IVsWindowSearchOption> list = new List<IVsWindowSearchOption>();
@@ -297,7 +285,6 @@ namespace VSMacros
 
             protected override void OnStartSearch()
             {
-                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 // Enable search on the MacroFSNodes so that only the matched nodes will be shown
                 MacroFSNode.EnableSearch();
 
@@ -331,14 +318,13 @@ namespace VSMacros
 
             private void TraverseAndMark(MacroFSNode root, string searchString, StringComparison comp, bool withinFileContents)
             {
-                Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
                 if (this.Contains(root.Name, searchString, comp))
                 {
                     root.IsMatch = true;
                 }
                 else if (withinFileContents && !root.IsDirectory)
                 {
-                    _ = System.Threading.Tasks.Task.Run(() =>
+                    System.Threading.Tasks.Task.Run(() =>
                     {
                         string allText = File.ReadAllText(root.FullPath);
                         if (this.Contains(allText, searchString, comp))

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="d889375e-da6c-4187-a52b-d3b5c8436d16" Version="1.4.0" Language="en-US" Publisher="Microsoft Corporation" />
+        <Identity Id="e4cb9e41-a4be-49f1-95f2-47fd4beb4c65" Version="1.4.0" Language="en-US" Publisher="Microsoft Corporation" />
         <DisplayName>Macros for Visual Studio 2022</DisplayName>
-        <Description xml:space="preserve">An extension for Visual Studio 2022 that enables the use of macros in the IDE. The extension can record most of the features in Visual Studio 2022 including text editing operations.</Description>
-        <MoreInfo>https://github.com/cobaltblueocean/VS-Macros-2022</MoreInfo>
+        <Description xml:space="preserve">An extension for Visual Studio that enables the use of macros in the IDE. The extension can record most of the features in Visual Studio including text editing operations.</Description>
+        <MoreInfo>https://visualstudiogallery.msdn.microsoft.com/d3fbf133-e51b-41a2-b86f-9560a96ff62b</MoreInfo>
         <License>MacrosForVisualStudioEULA.rtf</License>
         <ReleaseNotes>ReleaseNotes.txt</ReleaseNotes>
         <Icon>MacroIcon.png</Icon>
@@ -17,13 +17,15 @@
         </InstallationTarget>
     </Installation>
     <Dependencies>
-    </Dependencies>
+    
+    <Dependency Id="Microsoft.VisualStudio.MPF.16.0" DisplayName="Visual Studio MPF 16.0" d:Source="Installed" Version="[16.0,17.0)" />
+  </Dependencies>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
-        <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[15.0,)" DisplayName="C# and Visual Basic" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[17.0,18.0)" DisplayName="C# and Visual Basic" />
     </Prerequisites>
     <Assets>
-        <Asset Type="Microsoft.VisualStudio.VsPackage" Path="VSMacros.pkgdef" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="VSMacros" Path="|VSMacros|" />
     </Assets>
 </PackageManifest>

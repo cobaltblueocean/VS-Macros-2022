@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{34F4BD99-CE2F-4437-9CB1-766A772A1AAB}</ProjectGuid>
+    <ProjectGuid>{1F861FA3-45D0-4244-BAD8-3181AA3FA655}</ProjectGuid>
     <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VisualStudio.Macros.ExecutionEngine</RootNamespace>
     <AssemblyName>VisualStudio.Macros.ExecutionEngine</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -38,7 +36,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,35 +44,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.4.33103.184" ExcludeAssets="runtime">
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2120" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="ActiveScript Interfaces\IActiveScript.cs" />
     <Compile Include="ActiveScript Interfaces\IActiveScriptError.cs" />
     <Compile Include="ActiveScript Interfaces\IActiveScriptParse32.cs" />
     <Compile Include="ActiveScript Interfaces\IActiveScriptParse64.cs" />
     <Compile Include="ActiveScript Interfaces\IActiveScriptSite.cs" />
+    <Compile Include="Custom Exceptions\InternalVSException.cs" />
+    <Compile Include="Custom Exceptions\RuntimeException.cs" />
     <Compile Include="Engine Components\Engine.cs" />
+    <Compile Include="Engine Components\Parser.cs" />
+    <Compile Include="Engine Components\Site.cs" />
     <Compile Include="Enums\ScriptInfo.cs" />
     <Compile Include="Enums\ScriptItem.cs" />
     <Compile Include="Enums\ScriptState.cs" />
     <Compile Include="Enums\ScriptText.cs" />
     <Compile Include="Enums\ScriptThreadState.cs" />
     <Compile Include="Helpers\CommandHelper.cs" />
-    <Compile Include="Helpers\Interfaces\ICommandHelper.cs" />
     <Compile Include="Helpers\InputParser.cs" />
+    <Compile Include="Helpers\Interfaces\ICommandHelper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
-    <Compile Include="Custom Exceptions\InternalVSException.cs" />
-    <Compile Include="Engine Components\Parser.cs" />
-    <Compile Include="Pipes\Shared\BinderHelper.cs" />
     <Compile Include="Pipes\Client.cs" />
+    <Compile Include="Pipes\Shared\BinderHelper.cs" />
     <Compile Include="Pipes\Shared\CriticalError.cs" />
     <Compile Include="Pipes\Shared\FilePath.cs" />
-    <Compile Include="Pipes\Shared\PacketType.cs" />
     <Compile Include="Pipes\Shared\GenericScriptError.cs" />
+    <Compile Include="Pipes\Shared\PacketType.cs" />
     <Compile Include="Pipes\Shared\SharedVariables.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,16 +77,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Custom Exceptions\RuntimeException.cs" />
-    <Compile Include="Engine Components\Site.cs" />
     <Compile Include="Stubs\Script.cs" />
     <Compile Include="Utility.cs" />
-    <Compile Include="Validate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK">
+      <Version>17.0.32112.339</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="ExecutionEngine.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

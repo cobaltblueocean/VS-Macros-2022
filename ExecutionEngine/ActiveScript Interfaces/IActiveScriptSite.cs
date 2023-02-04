@@ -15,7 +15,7 @@ namespace ExecutionEngine.Interfaces
     internal interface IActiveScriptSite
     {
         void GetLCID(out int lcid);
-        void GetItemInfo([MarshalAs(UnmanagedType.LPWStr)]string name, ScriptInfo returnMask, out IntPtr item, IntPtr typeInfo);
+        void GetItemInfo([MarshalAs(UnmanagedType.LPWStr)] string name, ScriptInfo returnMask, out IntPtr item, IntPtr typeInfo);
         void GetDocVersionString(out string version);
         void OnScriptTerminate(object result, System.Runtime.InteropServices.ComTypes.EXCEPINFO exceptionInfo);
         void OnStateChange(ScriptState scriptState);

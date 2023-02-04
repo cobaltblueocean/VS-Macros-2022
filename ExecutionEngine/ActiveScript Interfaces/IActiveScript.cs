@@ -19,9 +19,9 @@ namespace ExecutionEngine.Interfaces
         void SetScriptState(ScriptState state);
         void GetScriptState(out ScriptState scriptState);
         void Close();
-        void AddNamedItem([MarshalAs(UnmanagedType.LPWStr)]string name, Enums.ScriptItem flags);
+        void AddNamedItem([MarshalAs(UnmanagedType.LPWStr)] string name, Enums.ScriptItem flags);
         void AddTypeLib(ref Guid typeLib, uint major, uint minor, uint flags);
-        void GetScriptDispatch([MarshalAs(UnmanagedType.LPWStr)]string itemName, out IntPtr dispatch);
+        void GetScriptDispatch([MarshalAs(UnmanagedType.LPWStr)] string itemName, out IntPtr dispatch);
         void GetCurrentScriptThreadID(out uint thread);
         void GetScriptThreadID(uint win32ThreadId, out uint thread);
         void GetScriptThreadState(uint thread, out ScriptThreadState state);

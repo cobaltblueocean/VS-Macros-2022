@@ -1,16 +1,18 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VSMacro2")]
+[assembly: AssemblyTitle("VSMacros2022")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("CIO")]
-[assembly: AssemblyProduct("VSMacro2")]
-[assembly: AssemblyCopyright("Copyright © CIO 2023")]
+[assembly: AssemblyCompany("Microsoft Corporation")]
+[assembly: AssemblyProduct("VSMacros2022")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -19,8 +21,11 @@ using System.Runtime.InteropServices;
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
+[assembly: CLSCompliant(false)]
+[assembly: NeutralResourcesLanguage("en-US")]
+
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("80a7d975-4d13-4f46-b7ab-a991996d5c79")]
+[assembly: Guid("dc0dd694-5ac0-4ba1-a5df-d2337d094190")]
 
 // Version information for an assembly consists of the following four values:
 //

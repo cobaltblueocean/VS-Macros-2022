@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSMacros-VSIX", "VSMacros-VSIX\VSMacros-VSIX.csproj", "{65235707-11E9-4200-AB45-CC1B602955FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS-Macros-2022", "VS-Macros-2022\VS-Macros-2022.csproj", "{65235707-11E9-4200-AB45-CC1B602955FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExecutionEngine", "ExecutionEngine\ExecutionEngine.csproj", "{34F4BD99-CE2F-4437-9CB1-766A772A1AAB}"
 EndProject

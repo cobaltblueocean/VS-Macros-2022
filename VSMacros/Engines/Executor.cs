@@ -11,7 +11,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft;
 using Microsoft.Internal.VisualStudio.Shell;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -80,7 +79,6 @@ namespace VSMacros.Engines
         private void RegisterCommandDispatcherinROT()
         {
             int hResult;
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             System.Runtime.InteropServices.ComTypes.IBindCtx bc;
             hResult = NativeMethods.CreateBindCtx(0, out bc);
 
@@ -109,7 +107,6 @@ namespace VSMacros.Engines
         private void RegisterCmdNameMappinginROT()
         {
             int hResult;
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             System.Runtime.InteropServices.ComTypes.IBindCtx bc;
             hResult = NativeMethods.CreateBindCtx(0, out bc);
 
@@ -142,7 +139,6 @@ namespace VSMacros.Engines
         /// 
         public void InitializeEngine()
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             this.RegisterCmdNameMappinginROT();
             this.RegisterCommandDispatcherinROT();
 
@@ -151,7 +147,6 @@ namespace VSMacros.Engines
             Server.serverWait.Start();
 
             EnvDTE.DTE dte = ((IServiceProvider)VSMacrosPackage.Current).GetService(typeof(SDTE)) as EnvDTE.DTE;
-            Assumes.Present(dte);
             string version = dte.Version;
 
             Executor.executionEngine = new Process();
@@ -182,7 +177,6 @@ namespace VSMacros.Engines
         /// 
         public void RunEngine(int iterations, string path)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
             if (IsServerReady() && IsExecutorReady())
             {
                 Server.SendFilePath(iterations, path);

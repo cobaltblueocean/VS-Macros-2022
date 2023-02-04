@@ -15,5 +15,5 @@ namespace VisualStudio.Macros.ExecutionEngine.Pipes
         public int Column;
         public string Source;
         public string Description;
-    } 
+    }
 }
